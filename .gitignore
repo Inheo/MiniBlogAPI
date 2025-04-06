@@ -1,0 +1,45 @@
+﻿# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.log
+*.sqlite3
+.env
+*.db
+
+# Venv
+.venv/
+env/
+venv/
+
+# VS Code / PyCharm
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test, coverage
+.coverage
+htmlcov/
+pytest_cache/
+
+# FastAPI docs cache (если что)
+__fastapi__/
+
+# Node
+node_modules/
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vite
+*.local
+*.cache
