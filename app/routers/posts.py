@@ -1,42 +1,52 @@
-﻿from fastapi import APIRouter, HTTPException
-from app.models.post import Post
-from app.db.fake_db import fake_posts_db
+﻿from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from app.schemas.post import PostCreate, PostResponse
+from app.db import models
+from app.db.database import get_db
 
 router = APIRouter()
 
 
-@router.get("/")
-def get_all_posts():
-    return fake_posts_db
+@router.get("/", response_model=list[PostResponse])
+def get_all_posts(db: Session = Depends(get_db)):
+    return db.query(models.Post).all()
 
 
-@router.get("/{post_id}")
-def get_post(post_id: int):
-    for post in fake_posts_db:
-        if post.id == post_id:
-            return post
-    raise HTTPException(status_code=404, detail="Post not found")
-
-
-@router.post("/", status_code=201)
-def create_post(post: Post):
-    fake_posts_db.append(post)
+@router.get("/{post_id}", response_model=PostResponse)
+def get_post(post_id: int, db: Session = Depends(get_db)):
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
     return post
 
 
-@router.put("/{post_id}")
-def update_post(post_id: int, updated_post: Post):
-    for i, post in enumerate(fake_posts_db):
-        if post.id == post_id:
-            fake_posts_db[i] = updated_post
-            return updated_post
-    raise HTTPException(status_code=404, detail="Post not found")
+@router.post("/", response_model=PostResponse, status_code=status.HTTP_201_CREATED)
+def create_post(new_post: PostCreate, db: Session = Depends(get_db)):
+    new_post = models.Post(title=new_post.title, content=new_post.content)
+    db.add(new_post)
+    db.commit()
+    db.refresh(new_post)
+    return new_post
 
 
-@router.delete("/{post_id}", status_code=204)
-def delete_post(post_id: int):
-    for i, post in enumerate(fake_posts_db):
-        if post.id == post_id:
-            fake_posts_db.pop(i)
-            return
-    raise HTTPException(status_code=404, detail="Post not found")
+@router.put("/{post_id}", response_model=PostResponse)
+def update_post(post_id: int, updated_post: PostCreate, db: Session = Depends(get_db)):
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    post.title = updated_post.title
+    post.content = updated_post.content
+    db.commit()
+    db.refresh(post)
+    return post
+
+
+@router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_post(post_id: int, db: Session = Depends(get_db)):
+    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    db.delete(post)
+    db.commit()
