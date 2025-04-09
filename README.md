@@ -84,7 +84,7 @@ Content-Type: application/json
 
 ## 📌 Планы на будущее
 
-- [ ] SQLite + SQLAlchemy
+- [x] SQLite + SQLAlchemy
 - [ ] Авторизация пользователей (JWT)
 - [ ] Docker-файл для деплоя
 
