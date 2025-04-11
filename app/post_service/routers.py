@@ -5,7 +5,7 @@ from typing import List
 from app.post_service import models, schemas
 from app.auth_service import models as user_models
 from app.db.database import get_db
-from app.auth_service.security import get_current_user
+from app.auth_service.security import get_current_auth_user
 
 router = APIRouter(prefix="/posts", tags=["Posts"])
 
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/posts", tags=["Posts"])
 def create_post(
     post: schemas.PostCreate,
     db: Session = Depends(get_db),
-    current_user: user_models.User = Depends(get_current_user),
+    current_user: user_models.User = Depends(get_current_auth_user),
 ):
     new_post = models.Post(**post.model_dump(), owner_id=current_user.id)
     db.add(new_post)
@@ -41,7 +41,7 @@ def update_post(
     post_id: int,
     updated_post: schemas.PostCreate,
     db: Session = Depends(get_db),
-    current_user: user_models.User = Depends(get_current_user),
+    current_user: user_models.User = Depends(get_current_auth_user),
 ):
     post = db.query(models.Post).filter(models.Post.id == post_id).first()
     if not post:
@@ -60,7 +60,7 @@ def update_post(
 def delete_post(
     post_id: int,
     db: Session = Depends(get_db),
-    current_user: user_models.User = Depends(get_current_user),
+    current_user: user_models.User = Depends(get_current_auth_user),
 ):
     post = db.query(models.Post).filter(models.Post.id == post_id).first()
     if not post:
