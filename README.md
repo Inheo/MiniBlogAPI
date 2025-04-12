@@ -51,17 +51,24 @@ uvicorn app.main:app --reload
 ```
 
 После запуска:
-- Swagger UI: http://localhost:8000/docs
+- Swagger UI: http://localhost:8000/docs  
 - ReDoc: http://localhost:8000/redoc
 
 ---
 
 ## 🔐 Аутентификация
 
-- Регистрация: `POST /auth/register`
-- Вход: `POST /auth/token` (используется `username` + `password`)
+- **Регистрация:** `POST /auth/register`
+- **Вход:** `POST /auth/token` (используется `username` + `password`)
+- **Обновление токена:** `POST /auth/refresh`  
+  (передаётся refresh token — генерируется при логине)
 - Получение токена JWT в ответ
 - Добавление токена: **Authorize** в Swagger UI
+
+> ⚠️ **Примечание:**  
+> В Swagger UI можно нажать кнопку **Authorize**, чтобы ввести `access` или `refresh` токен.  
+> Учти, что эндпоинт `/auth/refresh` ожидает именно **refresh токен**.  
+> Если передать в него `access токен`, обновление не произойдёт.
 
 ---
 
@@ -84,6 +91,7 @@ DATABASE_URL=sqlite:///./blog.db
 SECRET_KEY=секретный_ключ
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
+REFRESH_TOKEN_EXPIRE_MINUTES=10080  # 7 дней
 ```
 
 ---
@@ -104,6 +112,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 - [x] SQLite + SQLAlchemy
 - [x] Авторизация пользователей (JWT)
+- [x] Обновление access-токена через refresh-token
 - [ ] Docker-файл для деплоя
 - [ ] Подключение PostgreSQL для продакшена
 - [ ] Написание unit-тестов с pytest
