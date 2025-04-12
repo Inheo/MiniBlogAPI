@@ -1,12 +1,11 @@
 ﻿from datetime import datetime, timedelta
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
+from fastapi import HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
-from sqlalchemy.orm import Session
+from jose import jwt
 from app.config import settings
-from app.db.database import get_db
 from app.auth_service import models, schemas
+from dependencies import UserGetterFromToken
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -72,34 +71,6 @@ def create_jwt(
         expire_timedelta=expire_timedelta,
     )
 
-def get_current_token_payload(token: str = Depends(oauth2_scheme)) -> dict:
-    try:
-        payload = decode_jwt(token)
-    except JWTError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid token {e}",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    return payload
-
-def get_user_by_token(payload: dict, db: Session) -> models.User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
-    user_id: int = payload.get("sub")
-    if user_id is None:
-        raise credentials_exception
-
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    if user is None:
-        raise credentials_exception
-    return user
-
 
 def encode_jwt(
     payload: dict,
@@ -147,18 +118,6 @@ def validate_token_type(payload: dict, token_type: str) -> bool:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid token type {current_token_type!r} expected {token_type!r}"
         )
-
-class UserGetterFromToken:
-    def __init__(self, token_type: str):
-        self.token_type = token_type
-
-    def __call__(
-            self,
-            payload: dict = Depends(get_current_token_payload),
-            db: Session = Depends(get_db),
-    ):
-        validate_token_type(payload, self.token_type)
-        return get_user_by_token(payload, db)
 
 
 get_current_auth_user = UserGetterFromToken(ACCESS_TOKEN_TYPE)
