@@ -10,7 +10,6 @@ from app.auth_service.security import (
     generate_token,
     get_current_auth_user_for_refresh,
 )
-from app.auth_service.dependencies import get_current_token_payload
 
 router = APIRouter(
     prefix="/auth",
@@ -18,7 +17,7 @@ router = APIRouter(
     dependencies=[Depends(HTTPBearer(auto_error=False))]
 )
 
-@router.post("/register", response_model=schemas.UserResponse)
+@router.post("/register", response_model=schemas.Token)
 def register_user(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
     existing_user = db.query(models.User).filter(models.User.email == user_data.email).first()
     if existing_user:
@@ -37,7 +36,7 @@ def register_user(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/token", response_model=schemas.Token)
-def login(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
+def login(user_credentials: schemas.UserCreate, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == user_credentials.email).first()
     if not user or not verify_password(user_credentials.password, user.hashed_password):
         raise HTTPException(
