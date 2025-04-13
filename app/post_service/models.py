@@ -1,12 +1,12 @@
-﻿from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
-from app.db.database import Base
+﻿from sqlalchemy import Integer, String, ForeignKey
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from app.db.database import BaseWithId
 
-class Post(Base):
+class Post(BaseWithId):
     __tablename__ = "posts"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    content = Column(String)
-    owner_id = Column(Integer, ForeignKey("users.id"))
+
+    title: Mapped[str] = mapped_column(String, index=True)
+    content: Mapped[str] = mapped_column(String)
+    owner_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="posts")

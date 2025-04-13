@@ -1,12 +1,10 @@
 ﻿#DEFAULT_DATABASE_URL = "sqlite:///./blog.db"
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column
 from app.config import settings
 
 engine = create_engine(settings.DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
-Base = declarative_base()
 
 def get_db():
     db = SessionLocal()
@@ -14,3 +12,11 @@ def get_db():
         yield db
     finally:
         db.close()
+
+class Base(DeclarativeBase):
+    __abstract__ = True
+
+class BaseWithId(Base):
+    __abstract__ = True
+
+    id: Mapped[int] = mapped_column(primary_key=True, index=True)
