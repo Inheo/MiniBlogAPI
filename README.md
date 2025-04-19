@@ -113,6 +113,7 @@ REFRESH_TOKEN_EXPIRE_MINUTES=10080  # 7 дней
 - [x] SQLite + SQLAlchemy
 - [x] Авторизация пользователей (JWT)
 - [x] Обновление access-токена через refresh-token
+- [x] Swagger авторизация через JWT-токен
 - [ ] Docker-файл для деплоя
 - [ ] Подключение PostgreSQL для продакшена
 - [ ] Написание unit-тестов с pytest
@@ -120,7 +121,6 @@ REFRESH_TOKEN_EXPIRE_MINUTES=10080  # 7 дней
 - [ ] Поддержка комментирования постов
 - [ ] Ограничение доступа к CRUD только для владельца
 - [ ] Документация по API с примерами (Swagger/Redoc)
-- [ ] Swagger авторизация через JWT-токен
 
 ---
 
