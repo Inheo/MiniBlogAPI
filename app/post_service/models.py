@@ -10,3 +10,9 @@ class Post(BaseWithId):
     owner_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"))
 
     owner = relationship("User", back_populates="posts")
+
+    comments = relationship(
+        "Comment",
+        back_populates="post",
+        cascade="all, delete-orphan"
+    )

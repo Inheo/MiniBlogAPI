@@ -15,3 +15,9 @@ class User(BaseWithId):
         back_populates="owner",
         cascade="all, delete-orphan"
     )
+
+    comments = relationship(
+        "Comment",
+        back_populates="author",
+        cascade="all, delete-orphan"
+    )
