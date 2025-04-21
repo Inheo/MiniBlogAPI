@@ -65,7 +65,7 @@ def update_comment(
     return comment
 
 
-@router.delete("/comment_id", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{comment_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_comment(
     comment_id: int,
    db: Session = Depends(get_db),
