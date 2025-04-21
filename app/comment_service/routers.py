@@ -20,20 +20,27 @@ def create_comment_for_post(
     db: Session = Depends(get_db),
     current_user: auth_models.User = Depends(get_current_auth_user)
 ):
-    post = db.query(Post).filter(Post.id == post_id).first()
+    post = db.get(Post, post_id)
 
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
 
+    if comment_data.parent_id:
+        parent = db.get(models.Comment, comment_data.parent_id)
+        if not parent or parent.post_id != post_id:
+            raise HTTPException(status_code=400, detail="Invalid parent comment")
+
+
     comment = models.Comment(
         content=comment_data.content,
         post_id=post.id,
-        user_id=current_user.id
+        user_id=current_user.id,
+        parent_id = comment_data.parent_id
     )
 
     db.add(comment)
     db.commit()
-    db.refresh()
+    db.refresh(comment)
     return comment
 
 
@@ -49,7 +56,7 @@ def update_comment(
 
     comment.content = comment_data.content
     db.commit()
-    db.refresh()
+    db.refresh(comment)
     return comment
 
 
@@ -66,7 +73,7 @@ def delete_comment(
 
 
 def get_comment_by_user(comment_id:int, db: Session, current_user: auth_models.User) -> models.Comment:
-    comment = db.query(models.Comment).filter(models.Comment.id == comment_id).first()
+    comment = db.get(models.Comment, comment_id)
 
     if not comment:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
