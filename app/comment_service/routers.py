@@ -1,4 +1,5 @@
 ﻿from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.comment_service import schemas, models
@@ -7,7 +8,11 @@ from app.auth_service.security import get_current_auth_user
 from app.auth_service import models as auth_models
 from app.post_service.models import Post
 
-router = APIRouter(prefix="/comments", tags=["Comments"])
+router = APIRouter(
+    prefix="/comments",
+    tags=["Comments"],
+    dependencies=[Depends(HTTPBearer(auto_error=False))]
+)
 
 @router.get("/post/{post_id}", response_model=list[schemas.Comment])
 def get_comments_for_post(post_id: int, db: Session = Depends(get_db)):

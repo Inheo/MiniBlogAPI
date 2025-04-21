@@ -1,4 +1,5 @@
 ﻿from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -10,6 +11,7 @@ from app.auth_service import models as auth_models
 router = APIRouter(
     prefix="/posts",
     tags=["Posts"],
+    dependencies=[Depends(HTTPBearer(auto_error=False))]
 )
 
 
