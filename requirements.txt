@@ -1,4 +1,5 @@
-﻿fastapi
+﻿alembic
+fastapi
 uvicorn
 sqlalchemy
 python-jose
