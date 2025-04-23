@@ -30,7 +30,12 @@ MiniBlogAPI/
 │   ├── db/
 │   │   └── database.py
 │   └── config.py
+├── alembic/                  # Миграции Alembic
+│   ├── env.py
+│   ├── README.md             # Инструкция по Alembic
+│   └── versions/
 ├── .env                      # Настройки (секреты, подключение к БД)
+├── alembic.ini               # Настройки Alembic (путь к базе, пути к моделям и миграциям)
 ├── requirements.txt
 └── README.md
 ```
@@ -57,6 +62,8 @@ uvicorn app.main:app --reload
 После запуска:
 - Swagger UI: http://localhost:8000/docs  
 - ReDoc: http://localhost:8000/redoc
+
+> #### ⚙️ Для управления схемой БД используется Alembic — ([см. инструкцию.](alembic/README.md))
 
 ---
 
@@ -125,8 +132,8 @@ REFRESH_TOKEN_EXPIRE_MINUTES=10080  # 7 дней
 - [x] Ограничение доступа к CRUD только для владельца
 - [x] Поддержка комментирования постов
 - [x] Поддержка вложенных комментариев
+- [x] Alembic для управления миграциями ([инструкция](alembic/README.md))
 - [ ] Подключение PostgreSQL для продакшена
-- [ ] Alembic для управления миграциями
 - [ ] Docker-файл и docker-compose
 - [ ] Написание unit-тестов с pytest
 - [ ] CI/CD с помощью GitHub Actions
