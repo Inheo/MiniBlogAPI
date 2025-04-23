@@ -9,3 +9,4 @@ python-dotenv
 pydantic_settings
 pydantic[email]
 python-multipart
+black
