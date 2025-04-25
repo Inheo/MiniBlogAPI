@@ -1,9 +1,10 @@
 ﻿from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer, OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
 from app.auth_service import schemas, models
-from app.db.database import get_db
+from app.db.database import get_async_session
 from app.auth_service.security import (
     hash_password,
     verify_password,
@@ -18,8 +19,9 @@ router = APIRouter(
 )
 
 @router.post("/register", response_model=schemas.Token)
-def register_user(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
-    existing_user = db.query(models.User).filter(models.User.email == user_data.email).first()
+async def register_user(user_data: schemas.UserCreate, session: AsyncSession = Depends(get_async_session)):
+    result = await session.execute(select(models.User).where(models.User.email == user_data.email))
+    existing_user = result.scalars().first()
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -29,15 +31,16 @@ def register_user(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
         email=user_data.email,
         hashed_password=hash_password(user_data.password),
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    session.add(user)
+    await session.commit()
+    await session.refresh(user)
     return generate_token(user)
 
 
 @router.post("/token", response_model=schemas.Token)
-def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(models.User).filter(models.User.email == form_data.username).first()
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), session: AsyncSession = Depends(get_async_session)):
+    result = await session.execute(select(models.User).where(models.User.email == form_data.username))
+    user = result.scalars().first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -1,17 +1,14 @@
-﻿#DEFAULT_DATABASE_URL = "sqlite:///./blog.db"
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column
+﻿from typing import AsyncGenerator
+from sqlalchemy.ext.asyncio import  async_sessionmaker, create_async_engine, AsyncSession
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from app.config import settings
 
-engine = create_engine(settings.DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+engine = create_async_engine(settings.DATABASE_URL, echo=False)
+AsyncSessionLocal = async_sessionmaker(bind=engine, autocommit=False, autoflush=False, expire_on_commit=False)
 
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
+        yield session
 
 class Base(DeclarativeBase):
     __abstract__ = True

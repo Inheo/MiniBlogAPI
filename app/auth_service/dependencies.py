@@ -1,9 +1,9 @@
 ﻿from datetime import datetime, timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from jose import JWTError, jwt
-from app.db.database import get_db
+from app.db.database import get_async_session
 from app.auth_service import models
 from app.config import settings
 
@@ -59,7 +59,7 @@ def get_current_token_payload(token: str = Depends(oauth2_scheme)) -> dict:
     return payload
 
 
-def get_user_by_token(payload: dict, db: Session) -> models.User:
+async def get_user_by_token(payload: dict, session: AsyncSession) -> models.User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -70,9 +70,15 @@ def get_user_by_token(payload: dict, db: Session) -> models.User:
     if user_id is None:
         raise credentials_exception
 
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+    try:
+        user_id = int(user_id)
+    except ValueError:
+        raise credentials_exception
+
+    user = await session.get(models.User, user_id)
     if user is None:
         raise credentials_exception
+
     return user
 
 
@@ -80,10 +86,10 @@ class UserGetterFromToken:
     def __init__(self, token_type: str):
         self.token_type = token_type
 
-    def __call__(
+    async def __call__(
             self,
             payload: dict = Depends(get_current_token_payload),
-            db: Session = Depends(get_db),
+            session: AsyncSession = Depends(get_async_session),
     ) -> models.User:
         validate_token_type(payload, self.token_type)
-        return get_user_by_token(payload, db)
+        return await get_user_by_token(payload, session)

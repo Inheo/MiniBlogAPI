@@ -1,12 +1,13 @@
 ﻿from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from typing import List
 
-from app.db.database import get_db
-from app.auth_service.security import get_current_auth_user
+from app.db.database import get_async_session
 from app.post_service import models, schemas
 from app.auth_service import models as auth_models
+from app.auth_service.security import get_current_auth_user
 
 router = APIRouter(
     prefix="/posts",
@@ -16,39 +17,45 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[schemas.Post])
-def get_all_posts(db: Session = Depends(get_db)):
-    return db.query(models.Post).all()
+async def get_all_posts(session: AsyncSession = Depends(get_async_session)):
+    result = await session.execute(select(models.Post))
+    posts = result.scalars().all()
+    return posts
 
 
 @router.get("/{post_id}", response_model=schemas.Post)
-def get_post_by_id(post_id: int, db: Session = Depends(get_db)):
-    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+async def get_post_by_id(post_id: int, session: AsyncSession = Depends(get_async_session)):
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+    result = await session.execute(select(models.Post).where(models.Post.id == post_id))
+    post = result.scalars().first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     return post
 
 
 @router.post("/", response_model=schemas.Post, status_code=status.HTTP_201_CREATED)
-def create_post(
+async def create_post(
     post_data: schemas.PostCreate,
-    db: Session = Depends(get_db),
+    session: AsyncSession = Depends(get_async_session),
     current_user: auth_models.User = Depends(get_current_auth_user),
 ):
-    new_post = models.Post(**post_data.dict(), owner_id=current_user.id)
-    db.add(new_post)
-    db.commit()
-    db.refresh(new_post)
+    new_post = models.Post(**post_data.model_dump(), owner_id=current_user.id)
+    print(new_post)
+    session.add(new_post)
+    await session.commit()
+    await session.refresh(new_post)
     return new_post
 
 
 @router.put("/{post_id}", response_model=schemas.Post)
-def update_post(
+async def update_post(
     post_id: int,
     post_data: schemas.PostCreate,
-    db: Session = Depends(get_db),
+    session: AsyncSession = Depends(get_async_session),
     current_user: auth_models.User = Depends(get_current_auth_user),
 ):
-    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    result = await session.execute(select(models.Post).where(models.Post.id == post_id))
+    post = result.scalars().first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
 
@@ -57,23 +64,24 @@ def update_post(
 
     post.title = post_data.title
     post.content = post_data.content
-    db.commit()
-    db.refresh(post)
+    await session.commit()
+    await session.refresh(post)
     return post
 
 
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_post(
+async def delete_post(
     post_id: int,
-    db: Session = Depends(get_db),
+    session: AsyncSession = Depends(get_async_session),
     current_user: auth_models.User = Depends(get_current_auth_user),
 ):
-    post = db.query(models.Post).filter(models.Post.id == post_id).first()
+    result = await session.execute(select(models.Post).where(models.Post.id == post_id))
+    post = result.scalars().first()
     if not post:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
 
     if post.owner_id != current_user.id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this post")
 
-    db.delete(post)
-    db.commit()
+    await session.delete(post)
+    await session.commit()
