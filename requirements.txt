@@ -11,3 +11,4 @@ pydantic[email]
 python-multipart
 black
 psycopg2-binary>=2.9
+sqlalchemy[asyncio]
