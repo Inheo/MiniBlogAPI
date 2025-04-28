@@ -25,7 +25,6 @@ async def get_all_posts(session: AsyncSession = Depends(get_async_session)):
 
 @router.get("/{post_id}", response_model=schemas.Post)
 async def get_post_by_id(post_id: int, session: AsyncSession = Depends(get_async_session)):
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     result = await session.execute(select(models.Post).where(models.Post.id == post_id))
     post = result.scalars().first()
     if not post:
