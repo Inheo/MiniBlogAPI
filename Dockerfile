@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
     gcc \
+    netcat-openbsd \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -26,5 +27,8 @@ COPY . .
 # Открываем порт FastAPI
 EXPOSE 8000
 
+RUN chmod +x app/entrypoint.sh
+
+ENTRYPOINT ["./app/entrypoint.sh"]
 # Запуск сервера
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
