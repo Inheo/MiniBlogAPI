@@ -46,8 +46,7 @@ async def create_comment_for_post(
     )
 
     session.add(comment)
-    await session.commit()
-    await session.refresh(comment)
+    await session.flush()
     return comment
 
 
@@ -62,8 +61,6 @@ async def update_comment(
     comment = get_comment_by_user(comment_id, session, current_user)
 
     comment.content = comment_data.content
-    await session.commit()
-    await session.refresh(comment)
     return comment
 
 
@@ -76,7 +73,6 @@ async def delete_comment(
     comment = get_comment_by_user(comment_id, session, current_user)
 
     await session.delete(comment)
-    await session.commit()
 
 
 async def get_comment_by_user(comment_id:int, session: AsyncSession, current_user: auth_models.User) -> models.Comment:

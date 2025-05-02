@@ -32,8 +32,7 @@ async def register_user(user_data: schemas.UserCreate, session: AsyncSession = D
         hashed_password=hash_password(user_data.password),
     )
     session.add(user)
-    await session.commit()
-    await session.refresh(user)
+    await session.flush()
     return generate_token(user)
 
 

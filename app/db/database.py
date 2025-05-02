@@ -8,7 +8,8 @@ AsyncSessionLocal = async_sessionmaker(bind=engine, autocommit=False, autoflush=
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
-        yield session
+        async with session.begin():
+            yield session
 
 class Base(DeclarativeBase):
     __abstract__ = True

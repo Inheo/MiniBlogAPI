@@ -39,10 +39,8 @@ async def create_post(
     current_user: auth_models.User = Depends(get_current_auth_user),
 ):
     new_post = models.Post(**post_data.model_dump(), owner_id=current_user.id)
-    print(new_post)
     session.add(new_post)
-    await session.commit()
-    await session.refresh(new_post)
+    await session.flush()
     return new_post
 
 
@@ -63,8 +61,6 @@ async def update_post(
 
     post.title = post_data.title
     post.content = post_data.content
-    await session.commit()
-    await session.refresh(post)
     return post
 
 
@@ -83,4 +79,3 @@ async def delete_post(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this post")
 
     await session.delete(post)
-    await session.commit()
