@@ -27,8 +27,8 @@ COPY . .
 # Открываем порт FastAPI
 EXPOSE 8000
 
-RUN chmod +x app/entrypoint.sh
+RUN chmod +x entrypoint.sh
 
-ENTRYPOINT ["./app/entrypoint.sh"]
+ENTRYPOINT ["./entrypoint.sh"]
 # Запуск сервера
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
