@@ -3,11 +3,11 @@ from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.comment_service import schemas, models
+from app.comment import schemas, models
 from app.db.database import get_async_session
-from app.auth_service.security import get_current_auth_user
-from app.auth_service import models as auth_models
-from app.post_service.models import Post
+from app.auth.security import get_current_auth_user
+from app.auth import models as auth_models
+from app.post.models import Post
 
 router = APIRouter(
     prefix="/comments",

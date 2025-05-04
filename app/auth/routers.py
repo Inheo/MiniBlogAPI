@@ -3,9 +3,9 @@ from fastapi.security import HTTPBearer, OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.auth_service import schemas, models
+from app.auth import schemas, models
 from app.db.database import get_async_session
-from app.auth_service.security import (
+from app.auth.security import (
     hash_password,
     verify_password,
     generate_token,

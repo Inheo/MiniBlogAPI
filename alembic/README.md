@@ -23,7 +23,7 @@ pip install -r requirements.txt
 
 В `env.py` указано:
 ```python
-from app.db.database import Base  # или из app.auth_service.models / post_service.models
+from app.db.database import Base  # или из app.auth.models / post.models
 target_metadata = Base.metadata
 ```
 Это позволяет Alembic отслеживать изменения моделей в проекте.

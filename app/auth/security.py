@@ -1,8 +1,8 @@
 ﻿from datetime import timedelta
 from passlib.context import CryptContext
 from app.config import settings
-from app.auth_service import models, schemas
-from app.auth_service.dependencies import UserGetterFromToken, encode_jwt
+from app.auth import models, schemas
+from app.auth.dependencies import UserGetterFromToken, encode_jwt
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

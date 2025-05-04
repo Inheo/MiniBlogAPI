@@ -5,9 +5,9 @@ from sqlalchemy import select
 from typing import List
 
 from app.db.database import get_async_session
-from app.post_service import models, schemas
-from app.auth_service import models as auth_models
-from app.auth_service.security import get_current_auth_user
+from app.post import models, schemas
+from app.auth import models as auth_models
+from app.auth.security import get_current_auth_user
 
 router = APIRouter(
     prefix="/posts",

@@ -7,9 +7,9 @@ from alembic import context
 
 from app.config import settings
 from app.db.database import Base
-from app.auth_service import models as auth_models
-from app.post_service import models as post_models
-from app.comment_service import models as comment_models
+from app.auth import models as auth_models
+from app.post import models as post_models
+from app.comment import models as comment_models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
