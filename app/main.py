@@ -8,8 +8,6 @@ from app.db import database
 
 @asynccontextmanager
 async def lifespan(fast_app: FastAPI):
-    async with database.engine.begin() as conn:
-        await conn.run_sync(database.Base.metadata.create_all)
     yield
 
     database.engine.dispose()
