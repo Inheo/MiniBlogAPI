@@ -17,14 +17,13 @@ def encode_jwt(
     algorithm: str = settings.ALGORITHM,
     secret_key: str = settings.SECRET_KEY,
 ) -> str:
-    to_encode = payload.copy()
     now = datetime.now()
     if expire_timedelta:
         expire = now + expire_timedelta
     else:
         expire = now + timedelta(minutes=expire_minutes)
-    to_encode.update(exp=expire, iat=now)
-    return jwt.encode(to_encode, secret_key, algorithm=algorithm)
+    payload.update(exp=expire, iat=now)
+    return jwt.encode(payload, secret_key, algorithm=algorithm)
 
 
 def decode_jwt(
