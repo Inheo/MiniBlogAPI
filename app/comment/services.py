@@ -1,4 +1,6 @@
-﻿from fastapi import HTTPException, status
+﻿from typing import Sequence
+
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
@@ -7,7 +9,7 @@ from .schemas import CommentCreate
 from .models import Comment
 
 
-async def fetch_comments_by_post_id(post_id: int, session: AsyncSession) -> [Comment]:
+async def fetch_comments_by_post_id(post_id: int, session: AsyncSession) -> Sequence[Comment]:
     result = await session.execute(select(Comment).where(Comment.post_id == post_id))
     return result.scalars().all()
 
