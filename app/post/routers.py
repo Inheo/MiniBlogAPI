@@ -48,7 +48,7 @@ async def update_post(
     session: AsyncSession = Depends(get_async_session),
     current_user: auth_models.User = Depends(get_current_auth_user),
 ):
-    return update_user_post(post_id, post_data, session, current_user.id)
+    return await update_user_post(post_id, post_data, session, current_user.id)
 
 
 @router.delete("/{post_id}", status_code=status.HTTP_204_NO_CONTENT)
