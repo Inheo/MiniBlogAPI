@@ -4,8 +4,6 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 class CommentBase(BaseModel):
-    __abstract__= True
-
     content: str = Field(..., max_length=300)
     parent_id: Optional[int] = None
 
