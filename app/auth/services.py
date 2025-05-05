@@ -1,8 +1,8 @@
 ﻿from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from fastapi import HTTPException, status
 
+from .exceptions import UserAlreadyExistsException, InvalidUserCredentialsException
 from .schemas import UserCreate, Token
 from .models import User
 from .security import (
@@ -20,10 +20,7 @@ async def get_user_by_email(email: EmailStr, session: AsyncSession) -> User:
 async def register_new_user(user_data: UserCreate, session: AsyncSession) -> Token:
     existing_user = await get_user_by_email(user_data.email, session)
     if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="User with this email already exists"
-        )
+        raise UserAlreadyExistsException()
 
     user = User(
         email=user_data.email,
@@ -39,8 +36,5 @@ async def login_new(user_data: UserCreate, session: AsyncSession) -> Token:
     user = await get_user_by_email(user_data.email, session)
 
     if not user or not verify_password(user_data.password, user.hashed_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password"
-        )
+        raise InvalidUserCredentialsException()
     return generate_token(user)

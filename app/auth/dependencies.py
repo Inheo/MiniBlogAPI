@@ -1,11 +1,17 @@
 ﻿from datetime import datetime, timedelta
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from jose import JWTError, jwt
+
 from app.db.database import get_async_session
 from app.auth import models
 from app.config import settings
+from .exceptions import (
+    InvalidTokenTypeException,
+    InvalidTokenException,
+    InvalidCredentialsByTokenException
+)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
@@ -39,44 +45,31 @@ def validate_token_type(payload: dict, token_type: str) -> bool:
     if current_token_type == token_type:
         return True
     else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid token type {current_token_type!r} expected {token_type!r}",
-        )
+        raise InvalidTokenTypeException(current_token_type=current_token_type, token_type=token_type)
 
 
 def get_current_token_payload(token: str = Depends(oauth2_scheme)) -> dict:
     try:
         payload = decode_jwt(token)
     except JWTError as e:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid token {e}",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        raise InvalidTokenException(e)
 
     return payload
 
 
 async def get_user_by_token(payload: dict, session: AsyncSession) -> models.User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-
     user_id: int = payload.get("sub")
     if user_id is None:
-        raise credentials_exception
+        raise InvalidCredentialsByTokenException()
 
     try:
         user_id = int(user_id)
     except ValueError:
-        raise credentials_exception
+        raise InvalidCredentialsByTokenException()
 
     user = await session.get(models.User, user_id)
     if user is None:
-        raise credentials_exception
+        raise InvalidCredentialsByTokenException()
 
     return user
 
