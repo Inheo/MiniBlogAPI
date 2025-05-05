@@ -4,9 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 
 from app.db.database import get_async_session
-from app.post.schemas import Post, PostCreate
 from app.auth import models as auth_models
 from app.auth.security import get_current_auth_user
+from .schemas import Post, PostCreate
 from .services import (
     fetch_all_posts,
     fetch_post_by_id,

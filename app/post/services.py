@@ -3,7 +3,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from app.post.schemas import PostCreate
+from .schemas import PostCreate
 from .models import Post
 from .exceptions import (
     PostNotFoundException,
