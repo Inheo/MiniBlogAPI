@@ -1,11 +1,15 @@
 ﻿from typing import Sequence
 
-from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.post.schemas import PostCreate
 from .models import Post
+from .exceptions import (
+    PostNotFoundException,
+    NotAuthorizedForUpdatePostException,
+    NotAuthorizedForDeletePostException
+)
 
 
 async def fetch_all_posts(session: AsyncSession) -> Sequence[Post]:
@@ -17,7 +21,7 @@ async def fetch_post_by_id(post_id: int, session: AsyncSession) -> Post:
     result = await session.execute(select(Post).where(Post.id == post_id))
     post = result.scalars().first()
     if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+        raise PostNotFoundException()
     return post
 
 
@@ -41,7 +45,7 @@ async def update_user_post(
     post = await fetch_post_by_id(post_id, session)
 
     if post.owner_id != current_user_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to update this post")
+        raise NotAuthorizedForUpdatePostException()
 
     post.title = post_data.title
     post.content = post_data.content
@@ -56,6 +60,6 @@ async def remove_post(
     post = await fetch_post_by_id(post_id, session)
 
     if post.owner_id != current_user_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to delete this post")
+        raise NotAuthorizedForDeletePostException()
 
     await session.delete(post)
