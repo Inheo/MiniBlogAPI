@@ -1,13 +1,13 @@
 ﻿from typing import Sequence
 
-from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.post.models import Post
+from app.post.exceptions import PostNotFoundException
 from .schemas import CommentCreate
 from .models import Comment
-
+from .exceptions import CommentNotFoundException, InvalidParentCommentException, NotYourCommentException
 
 async def fetch_comments_by_post_id(post_id: int, session: AsyncSession) -> Sequence[Comment]:
     result = await session.execute(select(Comment).where(Comment.post_id == post_id))
@@ -23,12 +23,12 @@ async def add_comment_for_post(
     post = await session.get(Post, post_id)
 
     if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
+        raise PostNotFoundException()
 
     if comment_data.parent_id:
         parent = await session.get(Comment, comment_data.parent_id)
         if not parent or parent.post_id != post_id:
-            raise HTTPException(status_code=400, detail="Invalid parent comment")
+            raise InvalidParentCommentException()
 
 
     comment = Comment(
@@ -67,9 +67,9 @@ async def get_comment_by_user(comment_id:int, session: AsyncSession, current_use
     comment: Comment | None = await session.get(Comment, comment_id)
 
     if not comment:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
+        raise CommentNotFoundException()
 
     if not comment.user_id == current_user_id:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not your comment")
+        raise NotYourCommentException()
 
     return comment
