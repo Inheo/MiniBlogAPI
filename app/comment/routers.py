@@ -31,7 +31,6 @@ async def create_comment_for_post(
     session: AsyncSession = Depends(get_async_session),
     current_user: User = Depends(get_current_auth_user)
 ):
-
     return await add_comment_for_post(post_id, comment_data, session, current_user.id)
 
 
