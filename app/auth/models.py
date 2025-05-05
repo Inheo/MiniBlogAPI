@@ -1,10 +1,10 @@
 ﻿from sqlalchemy import String
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 
-from app.db.database import BaseWithId
+from app.db.database import Base
 
 
-class User(BaseWithId):
+class User(Base):
     __tablename__ = "users"
 
     email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)

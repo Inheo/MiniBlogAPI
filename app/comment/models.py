@@ -4,9 +4,9 @@ from sqlalchemy import String, Integer, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from typing import Optional
 
-from app.db.database import BaseWithId
+from app.db.database import Base
 
-class Comment(BaseWithId):
+class Comment(Base):
     __tablename__ = "comments"
 
     content: Mapped[str] = mapped_column(String, nullable=False)

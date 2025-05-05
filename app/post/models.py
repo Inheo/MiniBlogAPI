@@ -1,8 +1,8 @@
 ﻿from sqlalchemy import Integer, String, ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from app.db.database import BaseWithId
+from app.db.database import Base
 
-class Post(BaseWithId):
+class Post(Base):
     __tablename__ = "posts"
 
     title: Mapped[str] = mapped_column(String, index=True)

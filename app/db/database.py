@@ -14,7 +14,5 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 class Base(DeclarativeBase):
     __abstract__ = True
 
-class BaseWithId(Base):
-    __abstract__ = True
-
     id: Mapped[int] = mapped_column(primary_key=True)
+
