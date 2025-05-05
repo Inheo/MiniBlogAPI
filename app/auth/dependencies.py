@@ -44,8 +44,8 @@ def validate_token_type(payload: dict, token_type: str) -> bool:
     current_token_type = payload.get(settings.token_config.TOKEN_TYPE_FIELD)
     if current_token_type == token_type:
         return True
-    else:
-        raise InvalidTokenTypeException(current_token_type=current_token_type, token_type=token_type)
+
+    raise InvalidTokenTypeException(current_token_type=current_token_type, token_type=token_type)
 
 
 def get_current_token_payload(token: str = Depends(oauth2_scheme)) -> dict:
