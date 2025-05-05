@@ -1,8 +1,9 @@
 ﻿from datetime import timedelta
 from passlib.context import CryptContext
 from app.config import settings
-from app.auth import models, schemas
-from app.auth.dependencies import UserGetterFromToken, encode_jwt
+from .schemas import Token
+from .models import User
+from .dependencies import UserGetterFromToken, encode_jwt
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -15,16 +16,16 @@ def verify_password(plain: str, hashed: str) -> bool:
     return pwd_context.verify(plain, hashed)
 
 
-def generate_token(user: models.User) -> schemas.Token:
+def generate_token(user: User) -> Token:
     access_token = create_access_token(user)
     refresh_token = create_refresh_token(user)
-    return schemas.Token(
+    return Token(
         access_token=access_token,
         refresh_token=refresh_token
     )
 
 
-def create_access_token(user: models.User):
+def create_access_token(user: User):
     payload = {
         "sub": str(user.id),
         "id": user.id,
@@ -38,7 +39,7 @@ def create_access_token(user: models.User):
     )
 
 
-def create_refresh_token(user: models.User):
+def create_refresh_token(user: User):
     payload = {
         "sub": str(user.id),
     }

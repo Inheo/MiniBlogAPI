@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from jose import JWTError, jwt
 
 from app.db.database import get_async_session
-from app.auth import models
+from app.auth.models import User
 from app.config import settings
 from .exceptions import (
     InvalidTokenTypeException,
@@ -57,7 +57,7 @@ def get_current_token_payload(token: str = Depends(oauth2_scheme)) -> dict:
     return payload
 
 
-async def get_user_by_token(payload: dict, session: AsyncSession) -> models.User:
+async def get_user_by_token(payload: dict, session: AsyncSession) -> User:
     user_id: int = payload.get("sub")
     if user_id is None:
         raise InvalidCredentialsByTokenException()
@@ -67,7 +67,7 @@ async def get_user_by_token(payload: dict, session: AsyncSession) -> models.User
     except ValueError:
         raise InvalidCredentialsByTokenException()
 
-    user = await session.get(models.User, user_id)
+    user = await session.get(User, user_id)
     if user is None:
         raise InvalidCredentialsByTokenException()
 
@@ -82,6 +82,6 @@ class UserGetterFromToken:
             self,
             payload: dict = Depends(get_current_token_payload),
             session: AsyncSession = Depends(get_async_session),
-    ) -> models.User:
+    ) -> User:
         validate_token_type(payload, self.token_type)
         return await get_user_by_token(payload, session)
