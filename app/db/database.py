@@ -4,10 +4,10 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from app.config import settings
 
 engine = create_async_engine(settings.DATABASE_URL, echo=False)
-AsyncSessionLocal = async_sessionmaker(bind=engine, autocommit=False, autoflush=False, expire_on_commit=False)
+session_factory = async_sessionmaker(bind=engine, autocommit=False, autoflush=False, expire_on_commit=False)
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncSessionLocal() as session:
+    async with session_factory() as session:
         async with session.begin():
             yield session
 
