@@ -10,6 +10,7 @@ from app.db.database import Base
 from app.auth import models as auth_models
 from app.post import models as post_models
 from app.comment import models as comment_models
+from app.notification import models as notification_models
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
