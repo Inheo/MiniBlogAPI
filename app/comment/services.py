@@ -7,6 +7,7 @@ from app.post.models import Post
 from app.post.exceptions import PostNotFoundException
 from .schemas import CommentCreate
 from .models import Comment
+from .events import user_commented_on_post_or_comment
 from .exceptions import CommentNotFoundException, InvalidParentCommentException, NotYourCommentException
 
 async def fetch_comments_by_post_id(post_id: int, session: AsyncSession) -> Sequence[Comment]:
@@ -40,6 +41,7 @@ async def add_comment_for_post(
 
     session.add(comment)
     await session.flush()
+    await user_commented_on_post_or_comment(post, comment, session)
     return comment
 
 
