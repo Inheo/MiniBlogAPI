@@ -9,11 +9,12 @@ from app.core.event_payloads import CommentCreated
 
 async def user_commented_on_post_or_comment(post: Post, comment: Comment, session: AsyncSession):
     payload = CommentCreated(
+        author_comment_id=comment.user_id,
         comment_id=comment.id,
+        comment_parent_id=comment.parent_id,
+        comment_content=comment.content,
         post_id=post.id,
-        post_title=post.title,
-        post_owner_id=post.owner_id,
-        author_id=comment.user_id
+        post_owner_id=post.owner_id
     )
 
     await emit(EventType.USER_COMMENTED_ON_POST_OR_COMMENT, payload, session)
