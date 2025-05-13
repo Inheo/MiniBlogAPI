@@ -1,4 +1,5 @@
-﻿from typing import Callable, Awaitable, TypeVar
+﻿from collections import defaultdict
+from typing import Callable, Awaitable, TypeVar
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,7 +9,7 @@ from .event_payloads import EventBase
 T = TypeVar("T", bound=EventBase)
 EventHandler = Callable[[T, AsyncSession], Awaitable[None]]
 
-handlers: dict[EventType, list[EventHandler]] = {}
+handlers: dict[EventType, list[EventHandler]] = defaultdict(list)
 
 
 def on(event_name: EventType):
