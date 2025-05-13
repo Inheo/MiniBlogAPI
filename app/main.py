@@ -5,6 +5,7 @@ from app.post import routers as post_router
 from app.comment import routers as comment_router
 from app.notification import routers as notification_router
 from app.db import database
+import event_listeners
 
 
 @asynccontextmanager
